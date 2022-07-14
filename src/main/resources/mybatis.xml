@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns = "http://www.springframework.org/schema/beans"
+        xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance" xmlns:aop = "http://www.springframework.org/schema/aop"
+        xmlns:tx = "http://www.springframework.org/schema/tx"
+        xsi:schemaLocation = "http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+          init-method="init" destroy-method="close">
+        <property name="driverClassName" value="${spring.datasource.driver-class-name}"/>
+        <property name="url" value="${spring.datasource.url}"/>
+        <property name="username" value="${spring.datasource.password}"/>
+        <property name="password" value="${spring.datasource.password}"/>
+        <!-- 配置初始化大小、最小、最大 -->
+        <property name="initialSize" value="3"/>
+        <property name="minIdle" value="1"/>
+        <property name="maxActive" value="100"/>
+        <!-- 配置获取连接等待超时的时间 -->
+        <property name="maxWait" value="30000"/>
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis" value="60000"/>
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="300000"/>
+        <property name="testWhileIdle" value="true"/>
+        <!-- 这里建议配置为TRUE，防止取到的连接不可用 -->
+        <property name="testOnBorrow" value="true"/>
+        <property name="testOnReturn" value="false"/>
+        <!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+        <property name="poolPreparedStatements" value="false"/>
+        <!-- 验证连接有效与否的SQL，不同的数据配置不同 -->
+        <property name="validationQuery" value="select 1 "/>
+        <property name="filters" value="stat"/>
+
+    </bean>
+
+    <tx:advice id="advice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="select*" read-only="true"/>
+            <tx:method name="find*" read-only="true"/>
+            <tx:method name="get*" read-only="true"/>
+            <tx:method name="has*" read-only="true"/>
+            <tx:method name="count*" read-only="true"/>
+            <tx:method name="search*" read-only="true"/>
+            <tx:method name="list*" read-only="true"/>
+            <tx:method name="batchGet*" read-only="true"/>
+            <tx:method name="query*" read-only="true"/>
+            <tx:method name="*" rollback-for="java.lang.Exception"/>
+        </tx:attributes>
+    </tx:advice>
+<!--    &lt;!&ndash; 定义AOP配置 &ndash;&gt;-->
+<!--    <aop:config>-->
+<!--        &lt;!&ndash; 定义一个切入点 &ndash;&gt;-->
+<!--        <aop:pointcut expression="execution (* com.example.*.*(..))" id="services"/>-->
+<!--        &lt;!&ndash; 对切入点和事务的通知，进行适配 &ndash;&gt;-->
+<!--        <aop:advisor advice-ref="advice" pointcut-ref="services"/>-->
+<!--    </aop:config>-->
+<!--    <aop:aspectj-autoproxy proxy-target-class="true"/>-->
+
+
+    <!-- Session Factory -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+       <!-- <property name="mapperLocations" value="classpath:db/mapper/**/*Mapper.xml"/>-->
+        <property name="mapperLocations">
+            <array>
+                <value>classpath:mapper/*Mapper.xml</value>
+            </array>
+        </property>
+        <property name="typeAliasesPackage"
+                  value="com.example" />
+    </bean>
+
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.example"/>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+</beans>

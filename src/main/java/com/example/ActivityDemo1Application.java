@@ -8,8 +8,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ImportResource;
 
-@SpringBootApplication
+@SpringBootApplication(
+		exclude = {org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+				org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration.class})
+@ImportResource(locations = "classpath:mybatis.xml")
 public class ActivityDemo1Application {
 	private Logger logger = LoggerFactory.getLogger(ActivityDemo1Application.class);
 
